@@ -1,0 +1,54 @@
+name: Release
+
+# Builds module.zip and publishes a GitHub release whenever the version in
+# module.json changes on main. Foundry installs from the release assets.
+on:
+  push:
+    branches: [main]
+    paths: [module.json]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read version
+        id: version
+        run: echo "version=$(jq -r .version module.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if this version is already released
+        id: tag
+        run: |
+          if git ls-remote --exit-code --tags origin "refs/tags/v${{ steps.version.outputs.version }}" > /dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build release files
+        if: steps.tag.outputs.exists == 'false'
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          base="https://github.com/${{ github.repository }}"
+          mkdir dist
+          jq --arg url "$base" \
+             --arg manifest "$base/releases/latest/download/module.json" \
+             --arg download "$base/releases/download/v$version/module.zip" \
+             '.url = $url | .manifest = $manifest | .download = $download' module.json > dist/module.json
+          cp -r scripts styles lang README.md LICENSE dist/
+          (cd dist && zip -r ../module.zip module.json scripts styles lang README.md LICENSE)
+
+      - name: Publish release
+        if: steps.tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: v${{ steps.version.outputs.version }}
+          files: |
+            dist/module.json
+            module.zip

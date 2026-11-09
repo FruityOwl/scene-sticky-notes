@@ -1,0 +1,205 @@
+/* The layer copies the canvas's transform, so everything inside is in scene pixels
+   and zooms with the map. Sizes inside a note are in em of its own font size. */
+#ssn-layer {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transform-origin: 0 0;
+  pointer-events: none;
+}
+
+#ssn-layer .ssn-note {
+  --ssn-paper: #fdf1a8;
+  --ssn-strip: #f2db6c;
+  position: absolute;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  pointer-events: auto;
+  font-size: var(--ssn-font, 16px);
+  font-family: var(--font-body, "Signika"), sans-serif;
+  line-height: 1.35;
+  color: #2b2620;
+  background: var(--ssn-paper);
+  border-radius: 0.35em;
+  box-shadow: 0 0.2em 0.9em rgba(0, 0, 0, 0.45);
+}
+
+#ssn-layer .ssn-note[data-color="green"] { --ssn-paper: #d3f1bd; --ssn-strip: #a9dc8c; }
+#ssn-layer .ssn-note[data-color="blue"] { --ssn-paper: #cde6ff; --ssn-strip: #9ccaf5; }
+#ssn-layer .ssn-note[data-color="pink"] { --ssn-paper: #ffd3e3; --ssn-strip: #f6a8c6; }
+#ssn-layer .ssn-note[data-color="white"] { --ssn-paper: #f7f5ef; --ssn-strip: #dcd8cc; }
+
+#ssn-layer .ssn-note.is-moving,
+#ssn-layer .ssn-note.is-resizing {
+  box-shadow: 0 0.4em 1.6em rgba(0, 0, 0, 0.55);
+}
+
+#ssn-layer .ssn-note.is-collapsed {
+  height: auto !important;
+}
+
+#ssn-layer .ssn-head {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  height: 1.7em;
+  padding: 0 0.25em 0 0.6em;
+  font-size: 0.8em;
+  background: var(--ssn-strip);
+  user-select: none;
+  touch-action: none;
+}
+
+/* Only the GM's notes have a text box, and only the GM can move them. */
+#ssn-layer .ssn-note:has(textarea) .ssn-head {
+  cursor: grab;
+}
+
+#ssn-layer .ssn-note.is-moving .ssn-head {
+  cursor: grabbing;
+}
+
+#ssn-layer .ssn-shared {
+  display: none;
+  flex: none;
+  opacity: 0.6;
+}
+
+#ssn-layer .ssn-note.is-shared .ssn-shared {
+  display: inline-block;
+}
+
+#ssn-layer .ssn-title {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+  visibility: hidden;
+}
+
+#ssn-layer .ssn-note.is-collapsed .ssn-title {
+  visibility: visible;
+}
+
+#ssn-layer .ssn-tools {
+  flex: none;
+  display: flex;
+  gap: 0.1em;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  transition: opacity 0.12s;
+}
+
+#ssn-layer .ssn-note:hover .ssn-tools,
+#ssn-layer .ssn-note:focus-within .ssn-tools {
+  opacity: 1;
+}
+
+/* Foundry styles every button; these are small icons on paper. */
+#ssn-layer button.ssn-tool {
+  width: 1.45em;
+  height: 1.45em;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  font-size: 1em;
+  line-height: 1;
+  color: rgba(43, 38, 32, 0.7);
+  background: none;
+  border: 0;
+  border-radius: 0.25em;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+#ssn-layer button.ssn-tool:hover,
+#ssn-layer button.ssn-tool:focus-visible {
+  color: #1d1914;
+  background: rgba(0, 0, 0, 0.1);
+  outline: none;
+}
+
+#ssn-layer button.ssn-tool[data-action="delete"]:hover {
+  color: #8c1c13;
+}
+
+#ssn-layer button.ssn-tool i {
+  margin: 0;
+  font-size: 0.85em;
+  pointer-events: none;
+}
+
+#ssn-layer .ssn-text {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.35em 0.6em 0.7em;
+  overflow: auto;
+  font: inherit;
+  line-height: inherit;
+  color: inherit;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
+  resize: none;
+  scrollbar-width: thin;
+}
+
+#ssn-layer textarea.ssn-text::placeholder {
+  color: rgba(43, 38, 32, 0.45);
+}
+
+#ssn-layer .ssn-note.is-collapsed .ssn-text,
+#ssn-layer .ssn-note.is-collapsed .ssn-resize {
+  display: none;
+}
+
+#ssn-layer .ssn-resize {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 1.1em;
+  height: 1.1em;
+  cursor: nwse-resize;
+  touch-action: none;
+  background: linear-gradient(135deg, transparent 0 55%, rgba(43, 38, 32, 0.28) 55% 62%, transparent 62% 72%, rgba(43, 38, 32, 0.28) 72% 79%, transparent 79%);
+}
+
+/* The big editor: its text box fills the window and follows its size. */
+.ssn-editor .window-content,
+.ssn-editor form,
+.ssn-editor .dialog-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.ssn-editor textarea[name="ssnText"] {
+  flex: 1;
+  width: 100%;
+  min-height: 12em;
+  box-sizing: border-box;
+  padding: 0.6em 0.75em;
+  font-size: 1.05rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  resize: none;
+}

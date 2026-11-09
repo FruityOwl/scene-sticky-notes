@@ -1,0 +1,37 @@
+{
+  "id": "scene-sticky-notes",
+  "title": "Scene Sticky Notes",
+  "description": "Sticky notes for the GM that sit right on the scene. Type straight onto a note and see its whole text, move it, and resize it with the text reflowing to fit. Notes stay pinned to the map when you pan and zoom, and the GM can show any of them to players.",
+  "version": "1.0.0",
+  "authors": [
+    {
+      "name": "FruityOwl"
+    }
+  ],
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/main.css"
+  ],
+  "languages": [
+    {
+      "lang": "en",
+      "name": "English",
+      "path": "lang/en.json"
+    },
+    {
+      "lang": "ru",
+      "name": "Русский",
+      "path": "lang/ru.json"
+    }
+  ],
+  "url": "https://github.com/FruityOwl/scene-sticky-notes",
+  "manifest": "https://github.com/FruityOwl/scene-sticky-notes/releases/latest/download/module.json",
+  "download": "https://github.com/FruityOwl/scene-sticky-notes/releases/download/v1.0.0/module.zip",
+  "license": "LICENSE"
+}

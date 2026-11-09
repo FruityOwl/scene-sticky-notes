@@ -1,0 +1,23 @@
+{
+  "SSN": {
+    "NewNote": "New sticky note",
+    "Placeholder": "Type here…",
+    "Move": "Drag to move. Double-click to collapse or expand.",
+    "Resize": "Drag to resize",
+    "Colour": "Change the colour",
+    "Smaller": "Smaller text",
+    "Larger": "Larger text",
+    "ShowToPlayers": "Show to players",
+    "HideFromPlayers": "Hide from players",
+    "Shared": "Players can see this note",
+    "OpenEditor": "Open in a large editor",
+    "Collapse": "Collapse",
+    "Expand": "Expand",
+    "Delete": "Delete the note",
+    "DeleteConfirm": "Delete the note “{title}”? This can't be undone.",
+    "Cancel": "Cancel",
+    "Save": "Save",
+    "EditorTitle": "Sticky note",
+    "SaveFailed": "The sticky note couldn't be saved: {error}"
+  }
+}
