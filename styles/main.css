@@ -55,8 +55,8 @@
   touch-action: none;
 }
 
-/* Only the GM's notes have a text box, and only the GM can move them. */
-#ssn-layer .ssn-note:has(textarea) .ssn-head {
+/* Only the GM's notes can be edited, and only the GM can move them. */
+#ssn-layer .ssn-note:has(.ssn-rich) .ssn-head {
   cursor: grab;
 }
 
@@ -141,6 +141,7 @@
 }
 
 #ssn-layer .ssn-text {
+  position: relative;
   flex: 1;
   min-height: 0;
   width: 100%;
@@ -162,8 +163,28 @@
   scrollbar-width: thin;
 }
 
-#ssn-layer textarea.ssn-text::placeholder {
+#ssn-layer .ssn-text :is(ul, ol),
+.ssn-editor-body :is(ul, ol) {
+  margin: 0.15em 0;
+  padding-left: 1.4em;
+}
+
+#ssn-layer .ssn-text li,
+.ssn-editor-body li {
+  margin: 0;
+}
+
+#ssn-layer .ssn-text :is(div, p),
+.ssn-editor-body :is(div, p) {
+  margin: 0;
+}
+
+/* The placeholder sits behind the cursor rather than pushing it along. */
+.ssn-rich.is-empty::before {
+  content: attr(data-placeholder);
+  position: absolute;
   color: rgba(43, 38, 32, 0.45);
+  pointer-events: none;
 }
 
 #ssn-layer .ssn-note.is-collapsed .ssn-text,
@@ -192,14 +213,151 @@
   flex-direction: column;
 }
 
-.ssn-editor textarea[name="ssnText"] {
+.ssn-editor .ssn-editor-body {
+  position: relative;
   flex: 1;
-  width: 100%;
   min-height: 12em;
   box-sizing: border-box;
+  overflow: auto;
   padding: 0.6em 0.75em;
-  font-size: 1.05rem;
+  font-size: var(--ssn-font);
   line-height: 1.45;
+  color: #2b2620;
   white-space: pre-wrap;
-  resize: none;
+  overflow-wrap: anywhere;
+  background: #fdf8e4;
+  border: 1px solid rgba(43, 38, 32, 0.35);
+  border-radius: 4px;
+  outline: none;
+}
+
+.ssn-editor .ssn-editor-body:focus {
+  border-color: rgba(43, 38, 32, 0.6);
+}
+
+/* The formatting bar: outside the zoomed layer, so it keeps its size at any zoom.
+   It floats over Foundry's windows too, because it also serves the big editor. */
+#ssn-format {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  font: 13px/1 var(--font-body, "Signika"), sans-serif;
+  color: #ece6d8;
+  background: #1f1c18;
+  border: 1px solid #4b4339;
+  border-radius: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+  user-select: none;
+}
+
+#ssn-format[hidden],
+#ssn-format .ssn-fmt-menu[hidden] {
+  display: none;
+}
+
+#ssn-format button {
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  line-height: 1;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: none;
+  cursor: pointer;
+}
+
+#ssn-format button.ssn-fmt {
+  width: 28px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+}
+
+#ssn-format button.ssn-fmt[data-menu] {
+  width: 36px;
+}
+
+#ssn-format button i {
+  margin: 0;
+  pointer-events: none;
+}
+
+#ssn-format .ssn-caret {
+  font-size: 9px;
+  opacity: 0.7;
+}
+
+#ssn-format button:hover,
+#ssn-format button:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+
+#ssn-format button.ssn-fmt.is-on {
+  color: #1f1c18;
+  background: #e0b862;
+}
+
+#ssn-format .ssn-fmt-sep {
+  width: 1px;
+  height: 18px;
+  margin: 0 3px;
+  background: #4b4339;
+}
+
+#ssn-format .ssn-fmt-group {
+  position: relative;
+  display: inline-flex;
+}
+
+#ssn-format .ssn-fmt-menu {
+  position: absolute;
+  top: calc(100% + 5px);
+  left: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  width: max-content;
+  max-width: 200px;
+  padding: 6px;
+  background: #1f1c18;
+  border: 1px solid #4b4339;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.55);
+}
+
+#ssn-format .ssn-fmt-menu[data-menu-of="size"] {
+  flex-direction: column;
+  flex-wrap: nowrap;
+}
+
+#ssn-format button.ssn-fmt-item {
+  flex-basis: 100%;
+  padding: 5px 10px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+#ssn-format button.ssn-fmt-swatch {
+  width: 22px;
+  height: 22px;
+  background: var(--ssn-swatch);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+}
+
+#ssn-format button.ssn-fmt-swatch:hover {
+  background: var(--ssn-swatch);
+  border-color: #fff;
 }
